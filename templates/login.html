@@ -27,7 +27,6 @@
 <div>
     <a class="hiddenanchor" id="signup"></a>
     <a class="hiddenanchor" id="signin"></a>
-
     <div class="login_wrapper">
         <div class="animate form login_form">
             <section class="login_content">
@@ -35,44 +34,45 @@
                     {% csrf_token %}
                     <h1>登录窗口</h1>
                     <div class="form-group">
-                        {{ login_form.username.label_tag }}{{ login_form.username }}
+{#                        {{ login_form.username.label_tag }}#}
+                        {{ login_form.username }}
                     </div>
                     <div class="form-group">
-                        {{ login_form.password.label_tag }}{{ login_form.password }}
+{#                        {{ login_form.password.label_tag }}#}
+                        {{ login_form.password }}
                     </div>
                     <div class="form-group">
-                        <label>验证码:</label>
-                        <a href="#" class="captcha">
-                            <img src="{{ cap.image_url }}" alt="点击切换" id="id_captcha">
-                        </a>
+{#                        <label>验证码:</label>#}
                         <input type="text" name="captcha" placeholder="验证码" class="form-control"> <br>
                         <input value="{{ cap.hashkey }}" name="hashkey" type="hidden"
                                id="id_captcha_0">
+                        <a href="#" class="captcha">
+                            <img src="{{ cap.image_url }}" alt="点击切换" id="id_captcha">
+                        </a>
                     </div>
                     {% if login_form.captcha.errors %}
-                        <div id="info" style="display: none">{{ login_form.captcha.errors }}</div>
+                        <div id="info" style="display: none" >{{ login_form.captcha.errors }}</div>
                     {% elif error %}
                         <div id="info" style="display: none">{{ error }}</div>
                     {% endif %}
                     <div>
                         <button class="btn btn-default submit">登录</button>
-{#                        <a class="reset_pass" href="#">Lost your password?</a>#}
+                        {#                        <a class="reset_pass" href="#">Lost your password?</a>#}
                     </div>
 
                     <div class="clearfix"></div>
 
                     <div class="separator">
-                        <p class="change_link">New to site?
-                            <a href="#signup" class="to_register"> Create Account </a>
+                        <p class="change_link">还没有账号?
+                            <a href="" class="to_register"> 注册  </a>
                         </p>
 
                         <div class="clearfix"></div>
                         <br/>
 
                         <div>
-                            <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
-                            <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and
-                                Terms</p>
+                            <h1><i class="fa fa-paw"></i> DeepDetective</h1>
+                            <p>©2020 DeepDetective，智能谣言聚合平台</p>
                         </div>
                     </div>
                 </form>
@@ -81,41 +81,85 @@
 
         <div id="register" class="animate form registration_form">
             <section class="login_content">
-                <form>
-                    <h1>Create Account</h1>
-                    <div>
-                        <input type="text" class="form-control" placeholder="Username" required=""/>
+                <form class="form" method="post" action="/registration/">
+                    <h1>注册</h1>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ registration_form.userid }}
+                    </div>
+                    <div class="form-group">
+                        {{ registration_form.password }}
+                    </div>
+                    <div class="form-group">
+                        {{ registration_form.username }}
+                    </div>
+                    <div class="form-group">
+                        {{ registration_form.gender}}
                     </div>
                     <div>
-                        <input type="email" class="form-control" placeholder="Email" required=""/>
-                    </div>
-                    <div>
-                        <input type="password" class="form-control" placeholder="Password" required=""/>
-                    </div>
-                    <div>
-                        <a class="btn btn-default submit" href="index.html">Submit</a>
+                        <button class="btn btn-default submit">注册</button>
                     </div>
 
                     <div class="clearfix"></div>
 
                     <div class="separator">
-                        <p class="change_link">Already a member ?
-                            <a href="#signin" class="to_register"> Log in </a>
+                        <p class="change_link">已经有账号?
+                            <a href="" class="to_register"> 登录 </a>
                         </p>
 
                         <div class="clearfix"></div>
                         <br/>
 
                         <div>
-                            <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
-                            <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and
-                                Terms</p>
+                            <h1><i class="fa fa-paw"></i> DeepDetective</h1>
+                            <p>©2020 DeepDetective，智能谣言聚合平台</p>
                         </div>
                     </div>
                 </form>
             </section>
         </div>
+
     </div>
 </div>
 </body>
+<!--  Notifications Plugin    -->
+<script src="{% static "vendors/jquery/dist/jquery.min.js" %}"></script>
+<script src="{% static "build/js/bootstrap-notify.js" %}"></script>
+<script type="text/javascript">
+    function showNotification(message, from, align) {
+
+        $.notify({
+            icon: "nc-icon nc-app",
+            message: message
+        }, {
+            timer: 8000,
+            placement: {
+                from: from,
+                align: align
+            },
+            type:'warning'
+        });
+    }
+
+    $(document).ready(function () {
+
+        {#demo.checkFullPageBackgroundImage();#}
+        var info = $('#info').text();
+        if (info !== "") {
+            console.log(info);
+            showNotification(info);
+        }
+        setTimeout(function () {
+            // after 1000 ms we add the class animated to the login/register card
+            $('.card').removeClass('card-hidden');
+        }, 700);
+        <!-- 动态刷新验证码js -->
+        $('.captcha').click(function () {
+            $.getJSON("/refresh_captcha/", function (result) {
+                $('#id_captcha').attr('src', result['image_url']);
+                $('#id_captcha_0').val(result['hashkey'])
+            });
+        });
+    });
+</script>
 </html>

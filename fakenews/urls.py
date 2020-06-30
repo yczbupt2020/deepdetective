@@ -19,14 +19,18 @@ from deepdetective.deepdetective_utils import captcha_util
 from deepdetective.deepdetective_utils import login_util
 from django.urls import include
 from deepdetective import views
+from deepdetective.controller import user_controller
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # ***********登录、登出*************
     path('login/', login_util.login),
+    path('registration/', login_util.registration),
     path('captcha/', include('captcha.urls')),
     path('refresh_captcha/', captcha_util.refresh_captcha),
     path('logout/', login_util.logout),
 
     path('user/', views.main_user),
+    # 获取分页的谣言信息
+    path('user/get_page_news/', user_controller.get_news),
 ]
