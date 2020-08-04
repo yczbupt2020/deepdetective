@@ -28,6 +28,7 @@
 
     <!-- Custom Theme Style -->
     <link href="{% static "build/css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "build/css/searchbar.css" %}" rel="stylesheet">
 </head>
 
 <body class="nav-md">
@@ -35,9 +36,9 @@
     <div class="main_container">
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
-                <div class="navbar nav_title" style="border: 0;">
-                    <a href="index.html" class="site_title"><img style="width:100%;height:auto;"
-                                                                 src="{% static "resources/logo_end.png" %}"></img></a>
+                <div class="navbar nav_title" style="height: 80px;">
+                    <a href="/user/" class="site_title" style="height: 80px;"><img style="width:100%;height:auto;"
+                                                                                   src="{% static "resources/logo_end.png" %}"></img></a>
                 </div>
 
                 <div class="clearfix"></div>
@@ -48,7 +49,7 @@
                         <img src="{% static "resources/img.jpeg" %}" alt="..." class="img-circle profile_img">
                     </div>
                     <div class="profile_info">
-                        <span>Welcome,</span>
+                        <span>欢迎,</span>
                         <h2>{{ request.session.username }}</h2>
                     </div>
                 </div>
@@ -71,7 +72,8 @@
                 <div class="title_right">
                     <div class="col-md-12 col-sm-12 col-xs-12 form-group top_search">
                         <div class="input-group">
-                            <input id="search_input" type="text" class="form-control" placeholder="提问侦探...">
+                            <input id="search_input" type="text" class="form-control" placeholder="提问侦探..."
+                                   autocomplete="off">
                             <span class="input-group-btn">
 {#                            <select class="selectpicker show-tick form-control" data-live-search="true">#}
 {#                                <option>四川(sichuan)</option>#}
@@ -83,6 +85,9 @@
 {#                            </select>#}
                             <button class="btn btn-danger" type="button">搜索</button>
                             </span>
+                        </div>
+                        <div id="search_result" class="sb-content" style="display: none; z-index:9999;">
+
                         </div>
                     </div>
                 </div>
@@ -191,16 +196,19 @@
             "                                            <span>{tag_text}</span>\n" +
             "                                        </a>\n" +
             "                                    </div>\n" +
-            "                                    <div class=\"block_content\">\n" +
+            "<div class=\"row\">\n" +
+            "                                    <div class=\"block_content col-sm-9\">\n" +
             "                                        <h2 class=\"title\">\n" +
             "                                            <a>{title}</a>\n" +
             "                                        </h2>\n" +
             "                                        <div class=\"byline\">\n" +
             "                                            <span>{date}</span>\n" +
             "                                        </div>\n" +
-            "                                        <p class=\"excerpt\">{content} <a id=\"{detail_id}\">查看更多</a>\n" +
+            "                                        <p class=\"excerpt\">{content} <a id=\"{detail_id}\" href=\"get_detail?nid={query_id}\">查看更多</a>\n" +
             "                                        </p>\n" +
             "                                    </div>\n" +
+            "<div class=\"col-sm-3 text-right\"> <img src=\"{img_path}\"></div>\n" +
+            "</div>\n" +
             "                                </div>\n" +
             "                            </li>";
         page = 1;
@@ -228,13 +236,16 @@
                             tag_class = "tag_neutral";
                         }
 
+                        var id = content_json[i]["pk"];
                         var append_html = item_template.format({
                             "tag_class": tag_class,
                             "tag_text": tmp_json["fakemarktext"],
                             "title": tmp_json["title"],
                             "date": tmp_json["date"].replace("T00:00:00", ""),
                             "content": tmp_json["text"],
-                            "detail_id": "detail_"+content_json[i]["pk"]
+                            "detail_id": "detail_" + id,
+                            "query_id": id,
+                            "img_path": "/static/resources" + tmp_json["quickshow"].replace("./", "/")
                         });
                         $("#news_list").append(append_html);
                     }
@@ -252,16 +263,62 @@
                 ajax_load_news(page);
                 page += 1;
                 if (page >= total_num) {
-                    $("#bottom_line").attr("display", "inline");
+                    $("#bottom_line").css("display", "inline");
                 }
             }
         });
         //搜索框点击事件
-        $("#search_input").on("input",function () {
-           //ajax获取输入的模糊搜索前10结果
+        search_result_template = "<div class=\"s-mi-list\" data-tpl=\"list\" data-q=\"{title}\">" +
+            "                            <span class=\"s-mi-cont-key\"><b>{title}</b></span></div>";
+        var flag = true;
 
+        function ajax_search_text() {
+            if ($("#search_input").val() != "") {
+                $("#search_result").html("");
+                $.ajax({
+                    url: 'search_text/',
+                    type: "post",
+                    {#async: false,#}
+                    data: {"text": $("#search_input").val()},
+                    dataType: 'json',
+                    success: function (data) {
+                        {#console.info(data);#}
+                        if (data.query_result != '[]' && $("#search_input").val() != "") {
+                            console.info($.parseJSON(data.query_result));
+                            var query_result = $.parseJSON(data.query_result);
+                            for (var i = 0, l = query_result.length; (i < l) && (i < 10); i++) {
+                                var tmp_json = query_result[i]["fields"];
+                                var append_html = search_result_template.format({
+                                    "title": tmp_json["title"]
+                                });
+                                $("#search_result").append(append_html);
+                            }
+                            $("#search_result").addClass("sb-content-border");
+                            $("#search_result").css("display", "inline");
+                        } else {
+                            $("#search_result").removeClass("sb-content-border");
+                            $("#search_result").html("");
+                            $("#search_result").css("display", "none");
+                        }
+                    }
+                });
+            } else {
+                $("#search_result").removeClass("sb-content-border");
+                $("#search_result").html("");
+                $("#search_result").css("display", "none");
+            }
+        }
+
+        $("#search_input").on("input propertychange", function (event) {
+            if (!flag) ajax_search_text();
+        }).on('compositionstart', function () {
+            flag = true;
+        }).on('compositionend', function () {
+            flag = false;
+            ajax_search_text();
         });
-    });
+    })
+    ;
 </script>
 </body>
 </html>

@@ -33,4 +33,10 @@ urlpatterns = [
     path('user/', views.main_user),
     # 获取分页的谣言信息
     path('user/get_page_news/', user_controller.get_news),
+    # 模糊搜索谣言内容
+    path('user/search_text/', user_controller.search_text),
+    # 谣言详情
+    path('user/get_detail/',user_controller.get_detail),
+    # 查询具体辟谣信息
+    path('user/get_questiontext/',user_controller.get_questiontext),
 ]

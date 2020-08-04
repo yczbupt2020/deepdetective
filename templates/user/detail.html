@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DeepDetective 网络不实信息智能甄别系统 </title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "vendors/bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{% static "vendors/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="{% static "vendors/nprogress/nprogress.css" %}" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="{% static "vendors/iCheck/skins/flat/green.css" %}" rel="stylesheet">
+
+    <!-- bootstrap-progressbar -->
+    <link href="{% static "vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" %}" rel="stylesheet">
+    <!-- JQVMap -->
+    <link href="{% static "vendors/jqvmap/dist/jqvmap.min.css" %}" rel="stylesheet"/>
+    <!-- bootstrap-daterangepicker -->
+    <link href="{% static "vendors/bootstrap-daterangepicker/daterangepicker.css" %}" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="{% static "build/css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "build/css/searchbar.css" %}" rel="stylesheet">
+    <style>
+        .title_mark {
+            position: absolute;
+            right: 0;
+            top: 0.08rem;
+            width: 10rem;
+            height: 10rem;
+            opacity: 0.8;
+        }
+
+        .title_mark_doubt {
+            position: absolute;
+            right: 0;
+            top: 0.8rem;
+            width: 17rem;
+            height: 6rem;
+            opacity: 0.8;
+        }
+
+        .check_content_mark {
+            margin: 0.25rem 0 0.15rem 0;
+        }
+
+        .check_content_text {
+            color: #0f0f0f;
+            font-weight: bold;
+            font-size: 2rem;
+            line-height: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .mark_total {
+            display: inline-block;
+        }
+
+        .mark_title {
+            font-size: 2rem;
+            padding: 1px 1px 1px 1px;
+            border-radius: 3px 0 0 3px;
+            line-height: 0.2rem;
+            height: 0.2rem;
+            vertical-align: middle;
+            font-weight: normal;
+            color: #fff;
+            transform: scale(0.9, 0.8);
+        }
+
+        .mark_text {
+            font-size: 2rem;
+            padding: 1px 1px 1px 1px;
+            border-radius: 0 2px 2px 0;
+            line-height: 0.2rem;
+            height: 0.2rem;
+            vertical-align: middle;
+            background-color: #fff;
+        }
+
+        .fake_mark {
+            border: 0.01rem solid #c41f20;
+            border-right: 0;
+            background-color: #c41f20;
+            white-space: nowrap;
+        }
+
+        .true_mark {
+            border: 0.2rem solid #42a163;
+            border-right: 0;
+            background-color: #42a163;
+            white-space: nowrap;
+        }
+
+        .doubt_mark {
+            border: 0.01rem solid #484848;
+            border-right: 0;
+            background-color: #484848;
+            white-space: nowrap;
+        }
+
+        .fake_mark_text {
+            color: #c41f20;
+            border: 0.01rem solid #c41f20;
+            border-left: 0;
+            white-space: nowrap;
+        }
+
+        .true_mark_text {
+            color: #42a163;
+            border: 0.2rem solid #42a163;
+            border-left: 0;
+            white-space: nowrap;
+        }
+
+        .doubt_mark_text {
+            color: #484848;
+            border: 0.01rem solid #484848;
+            border-left: 0;
+            white-space: nowrap;
+        }
+
+        .point_num {
+            padding: 0 1rem;
+            margin-right: 0.6rem;
+            background-color: #334556;
+            color: #ffffff;
+        }
+
+        .questiontext_content p{
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="height: 80px;">
+                    <a href="/user/" class="site_title" style="height: 80px;"><img style="width:100%;height:auto;"
+                                                                                   src="{% static "resources/logo_end.png" %}"></img></a>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <!-- menu profile quick info -->
+                <div class="profile clearfix">
+                    <div class="profile_pic">
+                        <img src="{% static "resources/img.jpeg" %}" alt="..." class="img-circle profile_img">
+                    </div>
+                    <div class="profile_info">
+                        <span>欢迎,</span>
+                        <h2>{{ request.session.username }}</h2>
+                    </div>
+                </div>
+                <!-- /menu profile quick info -->
+
+                <br/>
+
+                {% include "user/sidebar.html" %}
+            </div>
+        </div>
+        {% include "user/topnav.html" %}
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>DeepDetective <small>在线实时辟谣</small></h3>
+                </div>
+
+                <div class="title_right">
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group top_search">
+                        <div class="input-group">
+                            <input id="search_input" type="text" class="form-control" placeholder="提问侦探..."
+                                   autocomplete="off">
+                            <span class="input-group-btn">
+{#                            <select class="selectpicker show-tick form-control" data-live-search="true">#}
+{#                                <option>四川(sichuan)</option>#}
+{#                                <option>江西(jiangxi)</option>#}
+{#                                <option>湖北(hubei)</option>#}
+{#                                <option>上海(shanghai)</option>#}
+{#                                <option>北京(beijing)</option>#}
+{#                                <option>河北(hebei)</option>#}
+{#                            </select>#}
+                            <button class="btn btn-danger" type="button">搜索</button>
+                            </span>
+                        </div>
+                        <div id="search_result" class="sb-content" style="display: none; z-index:9999;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="main_contain" class="row">
+                <div class="x_panel">
+                    <div class="x_title">
+
+                        <h1>{{ new.title }}</h1>
+                        {% if new.fakemark == "真" %}
+                            <img class="title_mark" src=" {% static "resources/true.png" %} "/>
+                        {% elif new.fakemark == "假" %}
+                            <img class="title_mark" src=" {% static "resources/fake.png" %} "/>
+                        {% elif new.fakemark == "疑" %}
+                            <img class="title_mark_doubt" src=" {% static "resources/doubt.png" %} "/>
+                        {% endif %}
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <p class="row">
+                            <span><h3>流传说法:</h3><h3 style="font-weight: normal;">{{ new.text }}</h3></span></p>
+                        <div class="check_content_mark">
+                            <span class="check_content_text">鉴定结论:</span>
+                            <span class="mark_total">
+                            {% if new.fakemark == "真" %}
+                                <span class="mark_title true_mark">{{ new.fakemark }}
+                                </span><span class="mark_text true_mark_text">{{ new.fakemarktext }}</span>
+                            {% elif new.fakemark == "假" %}
+                                <span class="mark_title fake_mark">{{ new.fakemark }}
+                                </span><span class="mark_text fake_mark_text">{{ new.fakemarktext }}</span>
+                            {% elif new.fakemark == "疑" %}
+                                <span class="mark_title doubt_mark">{{ new.fakemark }}
+                                </span><span class="mark_text doubt_mark_text">{{ new.fakemarktext }}</span>
+                            {% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="x_panel">
+                    <div class="x_title">
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <p>
+
+                            <span><h3>查证要点:</h3><h3 id="checkcontent"
+                                                    style="font-weight: normal;">{{ new.checkcontenttext }}</h3></span>
+                        </p>
+                        <p>
+                            <span><h3 id="checkcontentwriter">{{ new.checkcontentwriter }}</h3><h3 id="checkcontecttype"
+                                                                                                   style="display: none;">{{ new.checkcontecttype }}</h3></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="x_panel">
+                    <div class="x_title">
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="questiontext" class="x_content questiontext_content">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+            <div class="pull-right">
+                DeepDetective 网络不实信息智能甄别系统
+            </div>
+            <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="{% static "vendors/jquery/dist/jquery.min.js" %}"></script>
+<!-- Bootstrap -->
+<script src="{% static "vendors/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+<!-- FastClick -->
+<script src="{% static "vendors/fastclick/lib/fastclick.js" %}"></script>
+<!-- NProgress -->
+<script src="{% static "vendors/nprogress/nprogress.js" %}"></script>
+<!-- Chart.js -->
+<script src="{% static "vendors/Chart.js/dist/Chart.min.js" %}"></script>
+<!-- gauge.js -->
+<script src="{% static "vendors/gauge.js/dist/gauge.min.js" %}"></script>
+<!-- bootstrap-progressbar -->
+<script src="{% static "vendors/bootstrap-progressbar/bootstrap-progressbar.min.js" %}"></script>
+<!-- bootstrap-select -->
+<script src="{% static "vendors/bootstrap-select-1.13.14/js/bootstrap-select.js" %}"></script>
+<!-- iCheck -->
+<script src="{% static "vendors/iCheck/icheck.min.js" %}"></script>
+<!-- Skycons -->
+<script src="{% static "vendors/skycons/skycons.js" %}"></script>
+<!-- Flot -->
+<script src="{% static "vendors/Flot/jquery.flot.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.pie.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.time.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.stack.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.resize.js" %}"></script>
+<!-- Flot plugins -->
+<script src="{% static "vendors/flot.orderbars/js/jquery.flot.orderBars.js" %}"></script>
+<script src="{% static "vendors/flot-spline/js/jquery.flot.spline.min.js" %}"></script>
+<script src="{% static "vendors/flot.curvedlines/curvedLines.js" %}"></script>
+<!-- DateJS -->
+<script src="{% static "vendors/DateJS/build/date.js" %}"></script>
+<!-- JQVMap -->
+<script src="{% static "vendors/jqvmap/dist/jquery.vmap.js" %}"></script>
+<script src="{% static "vendors/jqvmap/dist/maps/jquery.vmap.world.js" %}"></script>
+<script src="{% static "vendors/jqvmap/examples/js/jquery.vmap.sampledata.js" %}"></script>
+<!-- bootstrap-daterangepicker -->
+<script src="{% static "vendors/moment/min/moment.min.js" %}"></script>
+<script src="{% static "vendors/bootstrap-daterangepicker/daterangepicker.js" %}"></script>
+
+<!-- Custom Theme Scripts -->
+<script src="{% static "build/js/custom.min.js" %}"></script>
+<script>
+    String.prototype.format = function (args) {
+        var result = this;
+        if (arguments.length > 0) {
+            if (arguments.length == 1 && typeof (args) == "object") {
+                for (var key in args) {
+                    if (args[key] != undefined) {
+                        var reg = new RegExp("({" + key + "})", "g");
+                        result = result.replace(reg, args[key]);
+                    }
+                }
+            } else {
+                for (var i = 0; i < arguments.length; i++) {
+                    if (arguments[i] != undefined) {
+                        var reg = new RegExp("({[" + i + "]})", "g");
+                        result = result.replace(reg, arguments[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    };
+    $(document).ready(function () {
+        var checklist = $("#checkcontent").text().split("\t");
+        if (checklist.length > 1) {
+            $("#checkcontent").html("")
+            $("#checkcontent").append("<ul style=\"list-style:none;\"></ul>")
+            for (var i = 1; i < checklist.length + 1; i++) {
+                $("#checkcontent ul").append("<li><span class=\"point_num\">" + i + "</span>" + checklist[i - 1].replace((i).toString(), "") + "</li>")
+            }
+        }
+        var checkcontectwriter = $("#checkcontentwriter").text();
+        var checkcontecttype = $("#checkcontecttype").text();
+        $("#checkcontentwriter").text(checkcontectwriter.replace(checkcontecttype, " " + checkcontecttype));
+        //ajax 查询详情
+        var newsid ={{ new.id }};
+        $.ajax({
+            url: '/user/get_questiontext/',
+            type: "post",
+            {#async: false,#}
+            data: {"newsid": newsid},
+            dataType: 'json',
+            success: function (data) {
+
+                var appendhtml=data.query_result.htmlcontext.replace("img src=\".","img src=\"\\static\\resources");
+                console.info(appendhtml);
+                $("#questiontext").append(appendhtml);
+            }
+        });
+    });
+</script>
+</body>
+</html>
