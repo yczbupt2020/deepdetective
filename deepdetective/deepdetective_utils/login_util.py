@@ -87,14 +87,28 @@ def registration(request):
             gender = registration_form.cleaned_data.get('gender')
             if gender == '':
                 gender = 0
-            models.Login.objects.create(username=userid, password=password, role=0)
-            models.User.objects.create(userid=userid, username=username, gender=int(gender))
-            request.session['is_login'] = True
-            request.session['userid'] = userid
-            request.session['username'] = username
-            request.session['role'] = 0
-            return redirect('/user/')
+            #查询是否已经存在该id
+            try:
+                userid_exist=models.Login.objects.get(username=userid)
+                #已经存在，返回错误信息
+                login_form = forms.LoginForm()
+                registration_form = forms.RegistrationForm()
+                cap = captcha()
+                error = "<h6>注册失败！</h6><span>id已存在</span>"
+                return render(request, 'login.html', locals())
+            except models.Login.DoesNotExist:
+                #创建新的id
+                models.Login.objects.create(username=userid, password=password, role=0)
+                models.User.objects.create(userid=userid, username=username, gender=int(gender))
+                request.session['is_login'] = True
+                request.session['userid'] = userid
+                request.session['username'] = username
+                request.session['role'] = 0
+                return redirect('/user/')
         else:
+            login_form = forms.LoginForm()
+            registration_form = forms.RegistrationForm()
+            cap = captcha()
             error = "<h6>注册失败！</h6><span>请检查输入</span>"
             return render(request, 'login.html', locals())
     else:
