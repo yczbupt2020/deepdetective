@@ -39,4 +39,18 @@ urlpatterns = [
     path('user/get_detail/',user_controller.get_detail),
     # 查询具体辟谣信息
     path('user/get_questiontext/',user_controller.get_questiontext),
+
+
+    path('user/check/', views.check_user),
+    # 查证
+    path('user/check/check_new/', user_controller.check_new),
+    # 谣言详情
+    path('user/check/get_detail/',user_controller.get_detail),
+    # 获取分页的查证信息
+    path('user/check/get_page_checknews/', user_controller.get_checknews),
+    # 相似新闻详情
+    path('user/check/get_linknews/',user_controller.get_linknews),
+    # 更新查证新闻的数据
+    path('user/check/refresh_checknew/',user_controller.refresh_checknew),
+
 ]
