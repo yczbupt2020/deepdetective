@@ -35,15 +35,15 @@ class News(models.Model):
     checkcontentwriter = models.CharField(max_length=45)
     checkcontecttype = models.CharField(max_length=100)
 
-    class Meta:
-        managed = False
-        db_table = 'news'
+    # class Meta:
+    #     managed = False
+    #     db_table = 'news'
 
 # 每个谣言对应的描述，详情页
 class Questiontext(models.Model):
     newsid = models.ForeignKey(News, models.DO_NOTHING, db_column='newsid')
     htmlcontext = models.TextField()
 
-    class Meta:
-        managed = False
-        db_table = 'questiontext'
+    # class Meta:
+    #     managed = False
+    #     db_table = 'questiontext'

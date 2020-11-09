@@ -80,9 +80,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'deepdetective',
-        'HOST':'123.56.124.114',
-        'USER':'root',
-        'PASSWORD':'zrxj123',
+        'HOST':'154.8.194.37',
+        'USER':'ycz',
+        'PASSWORD':'654321',
         'PORT':'3306'
     }
 }

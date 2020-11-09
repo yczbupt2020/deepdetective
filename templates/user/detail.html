@@ -359,8 +359,9 @@
             data: {"newsid": newsid},
             dataType: 'json',
             success: function (data) {
+                var reg=/img src="./g;
+                var appendhtml=data.query_result.htmlcontext.replace(reg,"img src=\"\\static\\resources");
 
-                var appendhtml=data.query_result.htmlcontext.replace("img src=\".","img src=\"\\static\\resources");
                 console.info(appendhtml);
                 $("#questiontext").append(appendhtml);
             }

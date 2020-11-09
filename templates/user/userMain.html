@@ -269,7 +269,7 @@
         });
         //搜索框点击事件
         search_result_template = "<div class=\"s-mi-list\" data-tpl=\"list\" data-q=\"{title}\">" +
-            "                            <span class=\"s-mi-cont-key\"><b>{title}</b></span></div>";
+            "                            <span class=\"s-mi-cont-key\"><a href=\"get_detail?nid={query_id}\">{title}</a></span></div>";
         var flag = true;
 
         function ajax_search_text() {
@@ -287,9 +287,10 @@
                             console.info($.parseJSON(data.query_result));
                             var query_result = $.parseJSON(data.query_result);
                             for (var i = 0, l = query_result.length; (i < l) && (i < 10); i++) {
-                                var tmp_json = query_result[i]["fields"];
+                                var tmp_json = query_result[i];
                                 var append_html = search_result_template.format({
-                                    "title": tmp_json["title"]
+                                    "title": tmp_json["fields"]["title"],
+                                    "query_id":tmp_json["pk"],
                                 });
                                 $("#search_result").append(append_html);
                             }
