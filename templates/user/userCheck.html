@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DeepDetective 网络不实信息智能甄别系统 </title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "vendors/bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{% static "vendors/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="{% static "vendors/nprogress/nprogress.css" %}" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="{% static "vendors/iCheck/skins/flat/green.css" %}" rel="stylesheet">
+
+    <!-- bootstrap-progressbar -->
+    <link href="{% static "vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" %}" rel="stylesheet">
+    <!-- JQVMap -->
+    <link href="{% static "vendors/jqvmap/dist/jqvmap.min.css" %}" rel="stylesheet"/>
+    <!-- bootstrap-daterangepicker -->
+    <link href="{% static "vendors/bootstrap-daterangepicker/daterangepicker.css" %}" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="{% static "build/css/custom.css" %}" rel="stylesheet">
+    <!-- PNotify -->
+    <link href="{% static "vendors/pnotify/dist/pnotify.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/pnotify/dist/pnotify.buttons.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/pnotify/dist/pnotify.nonblock.css" %}" rel="stylesheet">
+    {#    <style type="text/css">#}
+    {#        .ui-pnotify dark ui-pnotify-fade-normal ui-pnotify-in ui-pnotify-fade-in ui-pnotify-move{#}
+    {#            display: none;#}
+    {#        }#}
+    {#    </style>#}
+</head>
+
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="border: 0;">
+                    <a href="index.html" class="site_title"><img style="width:100%;height:auto;"
+                                                                 src="{% static "resources/logo_end.png" %}"></img></a>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <!-- menu profile quick info -->
+                <div class="profile clearfix">
+                    <div class="profile_pic">
+                        <img src="{% static "resources/img.jpeg" %}" alt="..." class="img-circle profile_img">
+                    </div>
+                    <div class="profile_info">
+                        <span>Welcome,</span>
+                        <h2>{{ request.session.username }}</h2>
+                    </div>
+                </div>
+                <!-- /menu profile quick info -->
+
+                <br/>
+
+                {% include "user/sidebar.html" %}
+            </div>
+        </div>
+        {% include "user/topnav.html" %}
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>DeepDetective
+                        <small>在线实时辟谣</small>
+                    </h3>
+                </div>
+
+            </div>
+            <div id="main_contain" class="row">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>谣言查证</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <form id="check_form" data-parsley-validate class="form-horizontal form-label-left">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="title">标题
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" id="title" required="required" placeholder='请输入新闻标题,标题与内容必填其一'
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="text">内容
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <textarea id="text" class="form-control col-md-7 col-xs-12" rows="3"
+                                              placeholder='请输入新闻内容,标题与内容必填其一'></textarea>
+                                </div>
+                            </div>
+                            <div class="ln_solid"></div>
+                            <div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                    {#                                    <button class="btn btn-primary" type="button">Cancel</button>#}
+                                    <button class="btn btn-primary" type="reset">重置</button>
+                                    <button type="button" class="btn btn-success" onclick="checkNew()">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="x_panel" id="checknew_result" style="display: none">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h1 id="checknew_result_title">checknew['title']</h1>
+                            {#                            <img id="checknew_result_img" class="title_mark" src=" {% static "resources/true.png" %}"/>#}
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <p class="row">
+                                 <span>
+                                     <h4 id="checknew_result_checkfakemark">查证结果：checknew['checkfakemark']</h4>
+                                     <h4 id="checknew_result_firstdate">初次查证时间：checknew['firstdate']</h4>
+                                     <h4 id="checknew_result_latestdate">初次查证时间：checknew['latestdate']</h4>
+                                     <h3 id="checknew_result_text" style="font-weight: normal;">checknew['text']</h3>
+                                </span>
+                            </p>
+                            <p class="excerpt"><a id="checknew_result_detail" href="get_detail?nid=">查看详情</a></p>
+                            <p class="excerpt"><a id="checknew_result_linknews" href="get_linknews?nid=">查看相似新闻</a></p>
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                <button id="checknew_result_btn" type="button" class="btn btn-primary"
+                                        onclick="refreshCheckNews()">更新
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>查证列表</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <ul id="checknews_list" class="list-unstyled timeline">
+
+                        </ul>
+                        <div id="bottom_line" class="x_title" style="display: none;">
+                            <h3>我们也是有底线的</h3>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+            <div class="pull-right">
+                DeepDetective 网络不实信息智能甄别系统
+            </div>
+            <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="{% static "vendors/jquery/dist/jquery.min.js" %}"></script>
+<!-- Bootstrap -->
+<script src="{% static "vendors/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+<!-- FastClick -->
+<script src="{% static "vendors/fastclick/lib/fastclick.js" %}"></script>
+<!-- NProgress -->
+<script src="{% static "vendors/nprogress/nprogress.js" %}"></script>
+<!-- Chart.js -->
+<script src="{% static "vendors/Chart.js/dist/Chart.min.js" %}"></script>
+<!-- gauge.js -->
+<script src="{% static "vendors/gauge.js/dist/gauge.min.js" %}"></script>
+<!-- bootstrap-progressbar -->
+<script src="{% static "vendors/bootstrap-progressbar/bootstrap-progressbar.min.js" %}"></script>
+<!-- bootstrap-select -->
+<script src="{% static "vendors/bootstrap-select-1.13.14/js/bootstrap-select.js" %}"></script>
+<!-- iCheck -->
+<script src="{% static "vendors/iCheck/icheck.min.js" %}"></script>
+<!-- Skycons -->
+<script src="{% static "vendors/skycons/skycons.js" %}"></script>
+<!-- Flot -->
+<script src="{% static "vendors/Flot/jquery.flot.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.pie.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.time.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.stack.js" %}"></script>
+<script src="{% static "vendors/Flot/jquery.flot.resize.js" %}"></script>
+<!-- Flot plugins -->
+<script src="{% static "vendors/flot.orderbars/js/jquery.flot.orderBars.js" %}"></script>
+<script src="{% static "vendors/flot-spline/js/jquery.flot.spline.min.js" %}"></script>
+<script src="{% static "vendors/flot.curvedlines/curvedLines.js" %}"></script>
+<!-- DateJS -->
+<script src="{% static "vendors/DateJS/build/date.js" %}"></script>
+<!-- JQVMap -->
+<script src="{% static "vendors/jqvmap/dist/jquery.vmap.js" %}"></script>
+<script src="{% static "vendors/jqvmap/dist/maps/jquery.vmap.world.js" %}"></script>
+<script src="{% static "vendors/jqvmap/examples/js/jquery.vmap.sampledata.js" %}"></script>
+<!-- bootstrap-daterangepicker -->
+<script src="{% static "vendors/moment/min/moment.min.js" %}"></script>
+<script src="{% static "vendors/bootstrap-daterangepicker/daterangepicker.js" %}"></script>
+<!-- PNotify -->
+<script src="{% static "vendors/pnotify/dist/pnotify.js" %}"></script>
+<script src="{% static "vendors/pnotify/dist/pnotify.buttons.js" %}"></script>
+<script src="{% static "vendors/pnotify/dist/pnotify.nonblock.js" %}"></script>
+
+<!-- Custom Theme Scripts -->
+<script src="{% static "build/js/custom.min.js" %}"></script>
+<script>
+    String.prototype.format = function (args) {
+        var result = this;
+        if (arguments.length > 0) {
+            if (arguments.length == 1 && typeof (args) == "object") {
+                for (var key in args) {
+                    if (args[key] != undefined) {
+                        var reg = new RegExp("({" + key + "})", "g");
+                        result = result.replace(reg, args[key]);
+                    }
+                }
+            } else {
+                for (var i = 0; i < arguments.length; i++) {
+                    if (arguments[i] != undefined) {
+                        var reg = new RegExp("({[" + i + "]})", "g");
+                        result = result.replace(reg, arguments[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    };
+    $(document).ready(function () {
+        {#doucument.getElementsByClassName('ui-pnotify dark ui-pnotify-fade-normal ui-pnotify-in ui-pnotify-fade-in ui-pnotify-move').styl.display='none';#}
+        {#$('.ui-pnotify dark ui-pnotify-fade-normal ui-pnotify-in ui-pnotify-fade-in ui-pnotify-move').html('');#}
+        item_template_1 = "<li>\n" +
+            "                                <div class=\"block\">\n" +
+            "                                    <div class=\"tags\">\n" +
+            "                                        <a href=\"#\" class=\"{tag_class}\">\n" +
+            "                                            <span>{tag_text}</span>\n" +
+            "                                        </a>\n" +
+            "                                    </div>\n" +
+            "                                    <div class=\"block_content\">\n" +
+            "                                        <h2 class=\"title\">\n" +
+            "                                            <a>{title}</a>\n" +
+            "                                        </h2>\n" +
+            "                                        <div class=\"byline\">\n" +
+            "                                            <span>初次查证时间：{first_date}</span>\n" +
+            "                                            <a>最近查证时间：{latest_date}</a>\n" +
+            "                                        </div>\n" +
+            "                                        <p class=\"excerpt\">{content} <a id=\"{detail_id}\" href=\"get_detail?nid={query_id}\">查看详情</a>\n" +
+            "                                        </p>\n" +
+            "                                    </div>\n" +
+            "                                </div>\n" +
+            "                            </li>";
+
+        item_template_0 = "<li>\n" +
+            "                                <div class=\"block\">\n" +
+            "                                    <div class=\"tags\">\n" +
+            "                                        <a href=\"#\" class=\"{tag_class}\">\n" +
+            "                                            <span>{tag_text}</span>\n" +
+            "                                        </a>\n" +
+            "                                    </div>\n" +
+            "                                    <div class=\"block_content\">\n" +
+            "                                        <h2 class=\"title\">\n" +
+            "                                            <a>{title}</a>\n" +
+            "                                        </h2>\n" +
+            "                                        <div class=\"byline\">\n" +
+            "                                            <span>初次查证时间：{first_date}</span>\n" +
+            "                                            <a>最近查证时间：{latest_date}</a>\n" +
+            "                                        </div>\n" +
+            "                                        <p class=\"excerpt\">{content} <a id=\"{checknews_id}\" href=\"get_linknews?nid={checknewsid}\" style=\"display: {display_flag}\">查看相似新闻</a>\n" +
+            "                                        </p>\n" +
+            {#"{linknewslist}"+#}
+            {#"                                        <p class=\"excerpt\">{comparesource}: <a href=\"{compareweb}\">{compareweb}</a>\n" +#}
+            {#"                                        </p>\n" +#}
+            "                                        <button type=\"button\" class=\"btn btn-primary\" onclick=\"refreshCheckNews('{checknewsid}')\" >更新</button>\n" +
+            "                                    </div>\n" +
+            "                                </div>\n" +
+            "                            </li>";
+
+        page = 1;
+        total_num = 0;
+        ajax_load_news(page);
+        page += 1;
+        $(window).scroll(function () {
+            var scrollTop = $(this).scrollTop();
+            var scrollHeight = $(document).height();
+            var windowHeight = $(this).height();
+            if (scrollTop + windowHeight >= scrollHeight) {
+
+                if (page >= total_num) {
+                    $("#bottom_line").attr("display", "inline");
+                } else {
+                    ajax_load_news(page);
+                    page += 1;
+                }
+            }
+        });
+
+    });
+
+    function ajax_load_news(page) {
+        $.ajax({
+            url: 'get_page_checknews/',
+            type: "post",
+            data: {"page": page},
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var content_json = data.page_content;
+                console.log(content_json);
+                total_num = data.num_pages;
+                for (var i = content_json.length - 1; i >= 0; i--) {
+                    var append_html;
+                    var tmp_json = content_json[i];
+                    var tag_class;
+                    var fakemark_text;
+                    if (tmp_json["checkfakemark"] == "假") {
+                        tag_class = "tag_warning";
+                        fakemark_text = "谣言"
+                    } else if (tmp_json["checkfakemark"] == "真") {
+                        tag_class = "tag";
+                        fakemark_text = "确实如此"
+                    } else if (tmp_json["checkfakemark"] == "疑") {
+                        tag_class = "tag_neutral";
+                        fakemark_text = "尚无定论"
+                    }
+                    var newsmark = tmp_json["newsmark"];
+                    if (newsmark === "1") {
+                        var id = tmp_json["newsid"];
+                        append_html = item_template_1.format({
+                            "tag_class": tag_class,
+                            "tag_text": fakemark_text,
+                            "title": tmp_json["title"],
+                            "first_date": tmp_json["firstdate"],
+                            "latest_date": tmp_json["latestdate"],
+                            "content": tmp_json["text"],
+                            "detail_id": "detail_" + id,
+                            "query_id": id
+                        });
+                    } else {
+                        var linkmark = tmp_json["linkmark"];
+                        var checknewsid = tmp_json["id"];
+                        var display_flag;
+                        if (linkmark === "1") {
+                            display_flag = "block";
+                        } else {
+                            display_flag = "none"
+                        }
+                        append_html = item_template_0.format({
+                            "tag_class": tag_class,
+                            "tag_text": fakemark_text,
+                            "title": tmp_json["title"],
+                            "first_date": tmp_json["firstdate"],
+                            "latest_date": tmp_json["latestdate"],
+                            "content": tmp_json["text"],
+                            "checknews_id": "checknews_" + checknewsid,
+                            "checknewsid": checknewsid,
+                            "display_flag": display_flag
+                        })
+                    }
+                    $("#checknews_list").append(append_html);
+                }
+            }
+        });
+    }
+
+    function checkNew() {
+        var title = $("#title").val();
+        var text = $("#text").val();
+        {#console.log(title);#}
+        if (title === "" && text === "") {
+            $(function () {
+                new PNotify({
+                    title: '提交失败',
+                    text: '标题与内容必填其一',
+                    type: 'error',
+                    styling: 'bootstrap3'
+                });
+            })
+        } else {
+            $.ajax({
+                url: 'check_new/',
+                type: "post",
+                data: {"title": title, "text": text},
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    var status = data.status;
+                    var info = data.info;
+                    var cur_checknew = data.cur_checknew;
+                    var type;
+                    if (status == 0) {
+                        type = 'dark'
+                    } else if (status == 1) {
+                        type = 'info'
+                    } else if (status == 2) {
+                        type = 'success'
+                    } else if (status == 3) {
+                        type = 'notice'
+                    }
+                    $(function () {
+                        new PNotify({
+                            title: '提交成功',
+                            text: info,
+                            type: type,
+                            styling: 'bootstrap3'
+                        });
+                    });
+                showCheckNew(cur_checknew[0]);
+                $("#checknews_list").html('');
+                ajax_load_news(page - 1);
+                }
+            })
+        }
+    }
+
+    function refreshCheckNews(checknew_id) {
+        console.log(checknew_id);
+        $.ajax({
+            url: 'refresh_checknew/',
+            type: "post",
+            data: {"checknew_id": checknew_id},
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var info = data.info;
+                var cur_checknew = data.cur_checknew;
+                $(function () {
+                    new PNotify({
+                        title: '更新成功',
+                        text: info,
+                        type: 'success',
+                        styling: 'bootstrap3'
+                    });
+                });
+                showCheckNew(cur_checknew[0]);
+                $("#checknews_list").html('');
+                ajax_load_news(page - 1);
+            }
+        });
+
+    }
+
+    function showCheckNew(cur_checknew) {
+        var checkfakemark = cur_checknew['checkfakemark'];
+        var fakemark_img;
+        var checkfaketext;
+        if (checkfakemark == "真") {
+            fakemark_img = '{% static "resources/true.png" %}';
+            checkfaketext = '确实如此';
+        } else if (checkfakemark == "假") {
+            fakemark_img = '{% static "resources/fake.png" %}';
+            checkfaketext = '谣言';
+        } else {
+            fakemark_img = '{% static "resources/doubt.png" %}';
+            checkfaketext = '尚无定论';
+        }
+        var newsmark = cur_checknew['newsmark'];
+        var linkmark = cur_checknew['linkmark'];
+        document.getElementById('checknew_result').style.display = 'block';
+        console.log(cur_checknew);
+        if (newsmark == "1") {
+            $('#checknew_result_title').html(cur_checknew['title']);
+            $('#checknew_result_checkfakemark').html('查证结果：' + cur_checknew['checkfakemark']);
+            $('#checknew_result_firstdate').html('初次查证时间：' + cur_checknew['firstdate']);
+            $('#checknew_result_latestdate').html('最近查证时间：' + cur_checknew['latestdate']);
+            $('#checknew_result_text').html(cur_checknew['text']);
+            document.getElementById('checknew_result_detail').style.display = 'block';
+            document.getElementById('checknew_result_linknews').style.display = 'none';
+            $('#checknew_result_detail').attr('href', 'get_detail?nid=' + cur_checknew['newsid']);
+            $('#checknew_result_btn').attr('onclick', 'refreshCheckNews(' + cur_checknew['id'] + ')');
+        } else {
+            if (linkmark === "1") {
+                $('#checknew_result_title').html(cur_checknew['title']);
+                {#$('#checknew_result_img').attr('src',fakemark_img);#}
+                $('#checknew_result_checkfakemark').html('查证结果：' + cur_checknew['checkfakemark']);
+                $('#checknew_result_firstdate').html('初次查证时间：' + cur_checknew['firstdate']);
+                $('#checknew_result_latestdate').html('最近查证时间：' + cur_checknew['latestdate']);
+                $('#checknew_result_text').html(cur_checknew['text']);
+                document.getElementById('checknew_result_detail').style.display = 'none';
+                document.getElementById('checknew_result_linknews').style.display = 'block';
+                $('#checknew_result_linknews').attr('href', 'get_linknews?nid=' + cur_checknew['id']);
+                $('#checknew_result_btn').attr('onclick', 'refreshCheckNews(' + cur_checknew['id'] + ')');
+            } else {
+                $('#checknew_result_title').html(cur_checknew['title']);
+                $('#checknew_result_checkfakemark').html('查证结果：' + cur_checknew['checkfakemark']);
+                $('#checknew_result_firstdate').html('初次查证时间：' + cur_checknew['firstdate']);
+                $('#checknew_result_latestdate').html('最近查证时间：' + cur_checknew['latestdate']);
+                $('#checknew_result_text').html(cur_checknew['text']);
+                document.getElementById('checknew_result_detail').style.display = 'none';
+                document.getElementById('checknew_result_linknews').style.display = 'none';
+                $('#checknew_result_btn').attr('onclick', 'refreshCheckNews(' + cur_checknew['id'] + ')');
+            }
+        }
+    }
+</script>
+</body>
+</html>
